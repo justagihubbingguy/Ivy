@@ -128,15 +128,9 @@ public class IvyLLVMFunctionEmitter {
             llvm.createEntryBlock(arena, function);
 
             statementEmitter.emitStatement(
-                bodyNode,
-                nodeTypes,
-                leftOrChild,
-                rightOrNext,
-                initNode,
-                tokenReferences,
-                arena,
-                tokenStream,
-                sourceStream
+                bodyNode, nodeTypes, leftOrChild,
+                rightOrNext, initNode, tokenReferences,
+                arena, tokenStream, sourceStream
             );
 
             return function;
