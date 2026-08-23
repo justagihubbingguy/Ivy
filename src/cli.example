@@ -1,0 +1,2 @@
+ivyc --pcc file.psn
+ivp --bin build

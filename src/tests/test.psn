@@ -1,0 +1,8 @@
+func add(x: Int32, y: Int32): Int32 {
+    x + y
+}
+#(inline_ivy)! {
+    public: add(int32, int32 x, int32 y) {
+        return x + y;
+    }
+}
