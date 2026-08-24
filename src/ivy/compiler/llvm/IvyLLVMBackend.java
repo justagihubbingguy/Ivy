@@ -47,6 +47,27 @@ public final class IvyLLVMBackend {
         );
     }
 
+    public MemorySegment buildCall(
+        Arena arena,
+        MemorySegment functionType,
+        MemorySegment callee,
+        MemorySegment[] args,
+        String name
+    ) {
+        MemorySegment argsArray = arena.allocate(
+            ValueLayout.ADDRESS,
+            args.length
+        );
+        for (int i = 0; i < args.length; i++) {
+            argsArray.setAtIndex(ValueLayout.ADDRESS, i, args[i]);
+        }
+        return LLVMBuildCall2(
+            llvmBuilder, functionType,
+            callee, argsArray,
+            args.length, toCString(arena, name)
+        );
+    }
+
     public MemorySegment buildFunctionType(
         Arena arena,
         MemorySegment returnType,
