@@ -44,7 +44,7 @@ public final class IvyCompilerBenchmark {
         IvySemanticAnalyzer analyzer =
             new IvySemanticAnalyzer(
                 SOURCE_FILE.getFileName().toString(),
-                16384
+                16384 // reject os, return to metal
             );
 
         boolean success =
