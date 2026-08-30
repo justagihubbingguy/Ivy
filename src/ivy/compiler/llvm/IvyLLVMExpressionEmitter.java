@@ -17,6 +17,17 @@ public class IvyLLVMExpressionEmitter {
         this.backend = backend;
         this.varManager = varManager;
     }
+
+    public void setFunctionCallEmitter(IvyLLVMFunctionCallEmitter functionCallEmitter) {
+        if (functionCallEmitter == null) {
+            throw new IllegalArgumentException(
+                "Function call emitter cannot be null!"
+            );
+        }
+
+        this.functionCallEmitter = functionCallEmitter;
+    }
+
     public void setFunctionEmitter(IvyLLVMFunctionEmitter functionEmitter) {
         if (functionEmitter == null) {
             throw new IllegalArgumentException("Function emitter cannot be null!");
