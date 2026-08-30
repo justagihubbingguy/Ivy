@@ -1082,4 +1082,7 @@ public class IvySemanticAnalyzer {
         return nodeResolvedTypes[astNodeIdx];
     }
 
+    public int[] getNodeResolvedFunctions() {
+        return nodeResolvedFunctions;
+    }
 }
