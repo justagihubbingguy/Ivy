@@ -61,6 +61,9 @@ public class IvyLLVMEmitter {
                 nodeResolvedFunctions,
                 expressionEmitter
             );
+        
+        expressionEmitter.setFunctionEmitter(functionEmitter);
+
         System.out.println(
             "st dump (total nodes: "
                 + nodeTypes.length
