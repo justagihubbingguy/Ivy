@@ -332,6 +332,36 @@ public class IvyParser {
         return fnNode;
     }
 
+    private int parseCurrentParameterListPratt() {
+        int headParam = -1;
+        int lastParam = -1;
+
+        while (peekTokenId() != IvyTokens.RPAREN && peekTokenId() != IvyTokens.EOF) {
+            int typeNode = parseType();
+            int nameTokenId = -1;
+            if (peekTokenId() == IvyTokens.IDENTIFIER) {
+                nameTokenId = cursor++;
+            }
+
+            int paramNode = ast.allocateASTNode(IvyAbstractSyntaxTreeTypes.PARAM, nameTokenId, typeNode, -1);
+
+            // so no more annoying "Node = -1"
+            if (headParam == -1) {
+                headParam = paramNode;
+            } else {
+                ast.rightOrNext[lastParam] = paramNode;
+            }
+            lastParam = paramNode;
+
+            if (!match(IvyTokens.COMMA)) {
+                break;
+            }
+        }
+
+        return headParam;
+    }
+
+
     private int parseType() {
         int baseTypeTokenId = cursor;
         cursor++;
