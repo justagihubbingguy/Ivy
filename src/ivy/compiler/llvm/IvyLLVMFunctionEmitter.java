@@ -13,6 +13,10 @@ public class IvyLLVMFunctionEmitter {
 
     private final IvyLLVMBackend llvm;
     private final IvyLLVMStatementEmitter statementEmitter;
+
+    private MemorySegment[] llvmFunctions;
+    private MemorySegment[] llvmFunctionTypes;
+
     private MemorySegment[] parameterValues;
     private String[] parameterNames;
 
