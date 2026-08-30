@@ -738,6 +738,8 @@ public class IvySemanticAnalyzer {
                     // IVY_TODO: replace with location-aware semantic error
                 }
 
+                nodeResolvedFunctions[nodeIdx] = functionIndex;
+
                 int returnType =
                     functionReturnTypes[functionIndex];
 
