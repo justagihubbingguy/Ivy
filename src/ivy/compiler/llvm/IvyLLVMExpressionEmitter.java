@@ -117,6 +117,22 @@ public class IvyLLVMExpressionEmitter {
                     default -> null;
                 };
             }
+            case IvyAbstractSyntaxTreeTypes.CALL:
+
+                return functionCallEmitter.emitFunctionCall(
+                    nodeId,
+                    nodeTypes,
+                    leftOrChild,
+                    rightOrNext,
+                    null,
+                    null,
+                    null,
+                    null,
+                    tokenReferences,
+                    arena,
+                    tokenStream,
+                    sourceStream
+                );
 
             default:
                 return null;
