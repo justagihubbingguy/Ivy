@@ -41,6 +41,26 @@ public class IvyLLVMEmitter {
         IvyTokenStream tokenStream,
         IvySourceStream sourceStream
     ) {
+        this.nodeResolvedFunctions = nodeResolvedFunctions;
+
+        llvmFunctions = new MemorySegment[nodeTypes.length];
+        llvmFunctionTypes = new MemorySegment[nodeTypes.length];
+
+        functionEmitter = new IvyLLVMFunctionEmitter(
+            backend,
+            statementEmitter,
+            llvmFunctions,
+            llvmFunctionTypes
+        );
+
+        functionCallEmitter =
+            new IvyLLVMFunctionCallEmitter(
+                backend,
+                llvmFunctions,
+                llvmFunctionTypes,
+                nodeResolvedFunctions,
+                expressionEmitter
+            );
         System.out.println(
             "st dump (total nodes: "
                 + nodeTypes.length
