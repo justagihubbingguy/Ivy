@@ -147,7 +147,9 @@ public final class IvyLLVMStatementEmitter {
         return varValue;
     }
 
-
+    public void clearVariables() {
+        variableManager.clear();
+    }
 
     private MemorySegment emitAssignment(
         int nodeId, int[] nodeTypes, int[] leftOrChild, int[] rightOrNext,

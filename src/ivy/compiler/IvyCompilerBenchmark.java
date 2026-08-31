@@ -9,7 +9,6 @@ import java.nio.file.Path;
 
 public final class IvyCompilerBenchmark {
 
-
     private static final int WARMUP_ITERATIONS = 20;
     private static final int BENCHMARK_ITERATIONS = 100;
 

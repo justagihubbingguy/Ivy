@@ -37,7 +37,6 @@ public final class IvyLLVMVariableManager {
 
         return pointer;
     }
-
     public MemorySegment get(String name) {
         return variables.get(name);
     }

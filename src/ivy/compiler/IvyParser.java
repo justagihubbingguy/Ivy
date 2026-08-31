@@ -221,39 +221,6 @@ public class IvyParser {
         return varNode;
     }
 
-    private int parseCurrentParameterListPratt() {
-        int headParam = -1;
-        int lastParam = -1;
-
-        while (peekTokenId() != IvyTokens.RPAREN &&
-            peekTokenId() != IvyTokens.EOF) {
-            int typeNode = parseType();
-            int nameTokenId = -1;
-            if (peekTokenId() == IvyTokens.IDENTIFIER) {
-                nameTokenId = cursor++;
-            }
-            int paramNode = ast.allocateASTNode(
-                IvyAbstractSyntaxTreeTypes.PARAM,
-                nameTokenId,
-                typeNode,
-                -1
-            );
-            // so no more annoying "Node = -1"
-            if (headParam == -1) {
-                headParam = paramNode;
-            } else {
-                ast.rightOrNext[lastParam] = paramNode;
-            }
-            lastParam = paramNode;
-
-            if (!match(IvyTokens.COMMA)) {
-                break;
-            }
-        }
-
-        return headParam;
-    }
-
     public int parseStatement() {
         int tokenType = peekTokenId();
         int tokenIdPos = cursor;
@@ -286,34 +253,20 @@ public class IvyParser {
 
     private int parseFunctionDecl(int annotationHead, int modifierMask) {
         int fnNameTokenId = cursor;
-
-        expect(
-            IvyTokens.IDENTIFIER,
-            "Expected function name"
-        );
-
-        expect(
-            IvyTokens.LPAREN,
-            "Expected '(' after function name"
-        );
+        expect(IvyTokens.IDENTIFIER, "Expected function name");
+        expect(IvyTokens.LPAREN, "Expected '(' after function name");
 
         int returnTypeNode = parseType();
-
         int paramHead = -1;
+
         if (match(IvyTokens.COMMA)) {
             paramHead = parseCurrentParameterListPratt();
         }
 
         expect(IvyTokens.RPAREN, "Expected ')' after return type/parameters");
-
         int bodyNode = parseIndentBlock();
 
-        int fnNode = ast.allocateASTNode(
-            IvyAbstractSyntaxTreeTypes.FUNC_DECL,
-            fnNameTokenId,
-            -1,
-            -1
-        );
+        int fnNode = ast.allocateASTNode(IvyAbstractSyntaxTreeTypes.FUNC_DECL, fnNameTokenId, -1, -1);
 
         ast.functionReturnType[fnNode] = returnTypeNode;
         ast.functionParameters[fnNode] = paramHead;

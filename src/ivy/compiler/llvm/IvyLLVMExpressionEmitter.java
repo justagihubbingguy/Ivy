@@ -11,6 +11,7 @@ public class IvyLLVMExpressionEmitter {
 
     private final IvyLLVMBackend backend;
     private final IvyLLVMVariableManager varManager;
+    private IvyLLVMFunctionCallEmitter functionCallEmitter;
     private IvyLLVMFunctionEmitter functionEmitter;
 
     public IvyLLVMExpressionEmitter(IvyLLVMBackend backend, IvyLLVMVariableManager varManager) {
@@ -34,6 +35,7 @@ public class IvyLLVMExpressionEmitter {
         }
         this.functionEmitter = functionEmitter;
     }
+
     public MemorySegment emitExpression(int nodeId, int[] nodeTypes, int[] leftOrChild, int[] rightOrNext, int[] tokenReferences, Arena arena, IvyTokenStream tokenStream, IvySourceStream sourceStream) {
 
         if (nodeId == -1) {

@@ -75,6 +75,7 @@ public class IvyCompilerContext {
                     ast.functionBody,
                     ast.initNode,
                     ast.tokenReference,
+                    analyzer.getNodeResolvedFunctions(),
                     arena,
                     tokenStream,
                     sourceStream
