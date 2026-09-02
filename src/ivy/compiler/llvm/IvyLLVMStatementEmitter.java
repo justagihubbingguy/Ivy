@@ -137,7 +137,7 @@ public final class IvyLLVMStatementEmitter {
                 tokenReferences, arena, tokenStream ,sourceStream
             );
         }
-
+        // TODO: Pointers
         MemorySegment pointer = variableManager.declare(arena, name);
 
         if (varValue != null) {
@@ -147,7 +147,9 @@ public final class IvyLLVMStatementEmitter {
         return varValue;
     }
 
-
+    public void clearVariables() {
+        variableManager.clear();
+    }
 
     private MemorySegment emitAssignment(
         int nodeId, int[] nodeTypes, int[] leftOrChild, int[] rightOrNext,

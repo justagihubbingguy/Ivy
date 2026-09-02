@@ -11,18 +11,31 @@ public class IvyLLVMExpressionEmitter {
 
     private final IvyLLVMBackend backend;
     private final IvyLLVMVariableManager varManager;
+    private IvyLLVMFunctionCallEmitter functionCallEmitter;
     private IvyLLVMFunctionEmitter functionEmitter;
 
     public IvyLLVMExpressionEmitter(IvyLLVMBackend backend, IvyLLVMVariableManager varManager) {
         this.backend = backend;
         this.varManager = varManager;
     }
+
+    public void setFunctionCallEmitter(IvyLLVMFunctionCallEmitter functionCallEmitter) {
+        if (functionCallEmitter == null) {
+            throw new IllegalArgumentException(
+                "Function call emitter cannot be null!"
+            );
+        }
+
+        this.functionCallEmitter = functionCallEmitter;
+    }
+
     public void setFunctionEmitter(IvyLLVMFunctionEmitter functionEmitter) {
         if (functionEmitter == null) {
             throw new IllegalArgumentException("Function emitter cannot be null!");
         }
         this.functionEmitter = functionEmitter;
     }
+
     public MemorySegment emitExpression(int nodeId, int[] nodeTypes, int[] leftOrChild, int[] rightOrNext, int[] tokenReferences, Arena arena, IvyTokenStream tokenStream, IvySourceStream sourceStream) {
 
         if (nodeId == -1) {
@@ -106,6 +119,22 @@ public class IvyLLVMExpressionEmitter {
                     default -> null;
                 };
             }
+            case IvyAbstractSyntaxTreeTypes.CALL:
+
+                return functionCallEmitter.emitFunctionCall(
+                    nodeId,
+                    nodeTypes,
+                    leftOrChild,
+                    rightOrNext,
+                    null,
+                    null,
+                    null,
+                    null,
+                    tokenReferences,
+                    arena,
+                    tokenStream,
+                    sourceStream
+                );
 
             default:
                 return null;

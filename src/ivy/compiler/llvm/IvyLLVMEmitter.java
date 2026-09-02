@@ -11,17 +11,18 @@ public class IvyLLVMEmitter {
 
     private final IvyLLVMBackend backend = new IvyLLVMBackend();
 
+    private MemorySegment[] llvmFunctions;
+    private MemorySegment[] llvmFunctionTypes;
+    private int[] nodeResolvedFunctions;
+
     private final IvyLLVMVariableManager variableManager = new IvyLLVMVariableManager(backend);
 
     private final IvyLLVMExpressionEmitter expressionEmitter = new IvyLLVMExpressionEmitter(backend, variableManager);
 
     private final IvyLLVMStatementEmitter statementEmitter = new IvyLLVMStatementEmitter(backend, expressionEmitter,variableManager);
 
-    private final IvyLLVMFunctionEmitter functionEmitter = new IvyLLVMFunctionEmitter(backend, statementEmitter);
-
-    {
-        expressionEmitter.setFunctionEmitter(functionEmitter);
-    }
+    private IvyLLVMFunctionEmitter functionEmitter;
+    private IvyLLVMFunctionCallEmitter functionCallEmitter;
 
     public void init(Arena arena, String modName) {
         backend.init(arena, modName);
@@ -37,82 +38,54 @@ public class IvyLLVMEmitter {
         int[] functionBody,
         int[] initNode,
         int[] tokenReferences,
+        int[] nodeResolvedFunctions,
         Arena arena,
         IvyTokenStream tokenStream,
         IvySourceStream sourceStream
     ) {
-        System.out.println(
-            "st dump (total nodes: "
-                + nodeTypes.length
-                + ")"
+        this.nodeResolvedFunctions = nodeResolvedFunctions;
+
+        llvmFunctions = new MemorySegment[nodeTypes.length];
+        llvmFunctionTypes = new MemorySegment[nodeTypes.length];
+
+        functionEmitter = new IvyLLVMFunctionEmitter(
+            backend,
+            statementEmitter,
+            llvmFunctions,
+            llvmFunctionTypes
         );
 
-        for (int i = 0; i < nodeTypes.length; i++) {
-            System.out.println(
-                "node [" + i + "] -> Type: "
-                    + nodeTypes[i]
-                    + ", Child/Left: "
-                    + leftOrChild[i]
-                    + ", Next/Right: "
-                    + rightOrNext[i]
-                    + " INIT"
+        functionCallEmitter = new IvyLLVMFunctionCallEmitter(
+            backend,
+            llvmFunctions,
+            llvmFunctionTypes,
+            nodeResolvedFunctions,
+            expressionEmitter
+        );
+
+        expressionEmitter.setFunctionEmitter(functionEmitter);
+        expressionEmitter.setFunctionCallEmitter(functionCallEmitter);
+
+        int current = rootNodeId;
+
+        while (current != -1) {
+            emitNode(
+                current,
+                nodeTypes,
+                leftOrChild,
+                rightOrNext,
+                functionReturnType,
+                functionParameters,
+                functionBody,
+                initNode,
+                tokenReferences,
+                arena,
+                tokenStream,
+                sourceStream
             );
+
+            current = rightOrNext[current];
         }
-
-        System.out.println(
-            "passed rootNodeId: " + rootNodeId
-        );
-
-        MemorySegment finalVal = emitNode(
-            rootNodeId, nodeTypes, leftOrChild, rightOrNext,
-            functionReturnType, functionParameters, functionBody, initNode,
-            tokenReferences, arena, tokenStream, sourceStream
-        );
-
-        if (finalVal == null) {
-            for (int i = 0; i < nodeTypes.length; i++) {
-
-                if (nodeTypes[i] ==
-                    IvyAbstractSyntaxTreeTypes.MULT
-                    || nodeTypes[i] ==
-                    IvyAbstractSyntaxTreeTypes.BLOCK
-                    || nodeTypes[i] ==
-                    IvyAbstractSyntaxTreeTypes.FUNC_DECL) {
-
-                    System.out.println(
-                        "[fallback] attempting emission "
-                            + "from active node index: " + i
-                    );
-
-                    finalVal = emitNode(
-                        i,
-                        nodeTypes,
-                        leftOrChild,
-                        rightOrNext,
-                        functionReturnType,
-                        functionParameters,
-                        functionBody,
-                        initNode,
-                        tokenReferences,
-                        arena,
-                        tokenStream,
-                        sourceStream
-                    );
-
-                    if (finalVal != null) {
-                        break;
-                    }
-                }
-            }
-        }
-
-//        if (finalVal == null) {
-//            backend.buildRet(finalVal);
-//        } else {
-//            backend.buildRet(
-//                backend.constI32(0)
-//            );
-//        }
     }
 
     public MemorySegment emitNode(
@@ -187,9 +160,9 @@ public class IvyLLVMEmitter {
                     sourceStream
                 );
 
-            case IvyAbstractSyntaxTreeTypes.FUNC_DECL: {
+            case IvyAbstractSyntaxTreeTypes.FUNC_DECL:
 
-                MemorySegment function =  functionEmitter.emitFunctionDecl(
+                return functionEmitter.emitFunctionDecl(
                     nodeId,
                     nodeTypes,
                     leftOrChild,
@@ -203,29 +176,6 @@ public class IvyLLVMEmitter {
                     tokenStream,
                     sourceStream
                 );
-                int next = rightOrNext[nodeId];
-
-                while (next != -1) {
-                    emitNode(
-                        next,
-                        nodeTypes,
-                        leftOrChild,
-                        rightOrNext,
-                        functionReturnType,
-                        functionParameters,
-                        functionBody,
-                        initNode,
-                        tokenReferences,
-                        arena,
-                        tokenStream,
-                        sourceStream
-                    );
-
-                    next = rightOrNext[next];
-
-                }
-                return function;
-            }
 
             case IvyAbstractSyntaxTreeTypes.UNKNOWN: {
 
@@ -269,6 +219,21 @@ public class IvyLLVMEmitter {
 
                 return null;
             }
+            case IvyAbstractSyntaxTreeTypes.CALL:
+                return functionCallEmitter.emitFunctionCall(
+                    nodeId,
+                    nodeTypes,
+                    leftOrChild,
+                    rightOrNext,
+                    functionReturnType,
+                    functionParameters,
+                    functionBody,
+                    initNode,
+                    tokenReferences,
+                    arena,
+                    tokenStream,
+                    sourceStream
+                );
 
             default:
                 return null;

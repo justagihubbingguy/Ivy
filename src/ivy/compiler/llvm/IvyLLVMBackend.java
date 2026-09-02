@@ -18,7 +18,23 @@ public final class IvyLLVMBackend {
     private MemorySegment llvmModule;
     private MemorySegment llvmBuilder;
 
+    private MemorySegment i64Type;
     private MemorySegment i32Type;
+    private MemorySegment i16Type;
+    private MemorySegment i8Type;
+
+    private MemorySegment u64Type;
+    private MemorySegment u32Type;
+    private MemorySegment u16Type;
+    private MemorySegment u8Type;
+
+    private MemorySegment f32Type;
+    private MemorySegment f64Type;
+    private MemorySegment f16Type;
+
+    private MemorySegment boolType;
+    private MemorySegment voidType;
+
 
     private MemorySegment toCString(Arena arena, String str) {
         return arena.allocateFrom(str + "\0", StandardCharsets.UTF_8);
@@ -28,14 +44,22 @@ public final class IvyLLVMBackend {
         llvmContext = LLVMContextCreate();
         llvmModule = LLVMModuleCreateWithNameInContext(toCString(arena, moduleName), llvmContext);
         llvmBuilder = LLVMCreateBuilderInContext(llvmContext);
+
+        i64Type = LLVMInt64TypeInContext(llvmContext);
         i32Type = LLVMInt32TypeInContext(llvmContext);
+        i16Type = LLVMInt16TypeInContext(llvmContext);
+        i8Type = LLVMInt8TypeInContext(llvmContext);
+
+        u64Type = LLVMInt64TypeInContext(llvmContext);
+        u32Type = LLVMInt32TypeInContext(llvmContext);
+        u16Type = LLVMInt16TypeInContext(llvmContext);
+        u8Type = LLVMInt8TypeInContext(llvmContext);
+
+        f64Type = LLVMDoubleTypeInContext(llvmContext);
+        f32Type = LLVMFloatTypeInContext(llvmContext);
+        f16Type = LLVMHalfTypeInContext(llvmContext);
     }
 
-    public MemorySegment createMainFunction(Arena arena) {
-        MemorySegment functionType = LLVMFunctionType(i32Type, MemorySegment.NULL, 0, 0);
-
-        return LLVMAddFunction(llvmModule, toCString(arena, "main"), functionType);
-    }
     public MemorySegment buildAlloca(
         Arena arena,
         String name
@@ -44,6 +68,27 @@ public final class IvyLLVMBackend {
             llvmBuilder,
             i32Type,
             toCString(arena,name)
+        );
+    }
+
+    public MemorySegment buildCall(
+        Arena arena,
+        MemorySegment functionType,
+        MemorySegment callee,
+        MemorySegment[] args,
+        String name
+    ) {
+        MemorySegment argsArray = arena.allocate(
+            ValueLayout.ADDRESS,
+            args.length
+        );
+        for (int i = 0; i < args.length; i++) {
+            argsArray.setAtIndex(ValueLayout.ADDRESS, i, args[i]);
+        }
+        return LLVMBuildCall2(
+            llvmBuilder, functionType,
+            callee, argsArray,
+            args.length, toCString(arena, name)
         );
     }
 

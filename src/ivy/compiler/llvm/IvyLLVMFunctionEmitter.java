@@ -13,12 +13,21 @@ public class IvyLLVMFunctionEmitter {
 
     private final IvyLLVMBackend llvm;
     private final IvyLLVMStatementEmitter statementEmitter;
+
+    private MemorySegment[] llvmFunctions;
+    private MemorySegment[] llvmFunctionTypes;
+
     private MemorySegment[] parameterValues;
     private String[] parameterNames;
 
-    public IvyLLVMFunctionEmitter(IvyLLVMBackend llvm, IvyLLVMStatementEmitter statementEmitter) {
+    public IvyLLVMFunctionEmitter(
+        IvyLLVMBackend llvm, IvyLLVMStatementEmitter statementEmitter,
+        MemorySegment[] llvmFunctions, MemorySegment[] llvmFunctionTypes
+    ) {
         this.llvm = llvm;
         this.statementEmitter = statementEmitter;
+        this.llvmFunctionTypes = llvmFunctionTypes;
+        this.llvmFunctions = llvmFunctions;
     }
 
     public MemorySegment emitFunctionDecl(
@@ -29,7 +38,7 @@ public class IvyLLVMFunctionEmitter {
         int[] tokenReferences, Arena arena,
         IvyTokenStream tokenStream, IvySourceStream sourceStream
     ) {
-
+        statementEmitter.clearVariables();
             System.out.println(
                 "[FUNCTION] node=" + nodeId
                     + " tokenRef=" + tokenReferences[nodeId]
@@ -87,14 +96,20 @@ public class IvyLLVMFunctionEmitter {
 
             int parameterCount = countParameters(parameterNode, rightOrNext);
 
-            MemorySegment function = llvm.buildFunction(
-                arena,
-                name, llvm.buildFunctionType(
+            MemorySegment functionType =
+                llvm.buildFunctionType(
                     arena,
                     llvm.getLLVMType(returnType),
                     parameterTypes
-                )
+                );
+
+            MemorySegment function = llvm.buildFunction(
+                arena,
+                name,
+                functionType
             );
+            llvmFunctions[nodeId] = function;
+            llvmFunctionTypes[nodeId] = functionType;
 
             parameterValues = new MemorySegment[parameterCount];
 

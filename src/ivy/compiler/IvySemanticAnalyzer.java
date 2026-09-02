@@ -46,6 +46,8 @@ public class IvySemanticAnalyzer {
     private boolean insideFunction = false;
 
     private final int[] nodeResolvedTypes;
+    private final int[] nodeResolvedFunctions;
+    private final int[] functionNodeIds;
 
     private int currentFunctionReturnType =
         IvyAbstractSyntaxTreeTypes.UNKNOWN;
@@ -57,6 +59,8 @@ public class IvySemanticAnalyzer {
 
         this.functionReturnTypes = new int[astCapacity];
         this.functionParameterHeads = new int[astCapacity];
+        this.nodeResolvedFunctions = new int[astCapacity];
+        this.functionNodeIds = new int[astCapacity];
     }
 
     private IvySemanticException error(
@@ -627,6 +631,8 @@ public class IvySemanticAnalyzer {
                     functionTokenRef[functionCount] = tokenRef;
                     functionReturnTypes[functionCount] = declaredReturnType;
                     functionParameterHeads[functionCount] = parameterNode;
+                    functionNodeIds[functionCount] = nodeIdx;
+
                     functionCount++;
 
                     if (declaredReturnType ==
@@ -737,6 +743,8 @@ public class IvySemanticAnalyzer {
 
                     // IVY_TODO: replace with location-aware semantic error
                 }
+
+                nodeResolvedFunctions[nodeIdx] = functionNodeIds[functionIndex];
 
                 int returnType =
                     functionReturnTypes[functionIndex];
@@ -1012,6 +1020,7 @@ public class IvySemanticAnalyzer {
      * @param c
      * @return isIdentifier
      */
+
     private boolean isIdentifierBoundary(char c) {
 
 
@@ -1066,11 +1075,13 @@ public class IvySemanticAnalyzer {
 
         return -1;
     }
+
     /**
      *
      * Get The correct Type.
      *
      **/
+
     public int getResolvedType(int astNodeIdx) {
         if (astNodeIdx < 0 ||
             astNodeIdx >= nodeResolvedTypes.length) {
@@ -1080,4 +1091,7 @@ public class IvySemanticAnalyzer {
         return nodeResolvedTypes[astNodeIdx];
     }
 
+    public int[] getNodeResolvedFunctions() {
+        return nodeResolvedFunctions;
+    }
 }

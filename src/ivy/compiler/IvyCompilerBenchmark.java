@@ -9,7 +9,6 @@ import java.nio.file.Path;
 
 public final class IvyCompilerBenchmark {
 
-
     private static final int WARMUP_ITERATIONS = 20;
     private static final int BENCHMARK_ITERATIONS = 100;
 
@@ -44,7 +43,7 @@ public final class IvyCompilerBenchmark {
         IvySemanticAnalyzer analyzer =
             new IvySemanticAnalyzer(
                 SOURCE_FILE.getFileName().toString(),
-                16384
+                16384 // reject os, return to metal
             );
 
         boolean success =
